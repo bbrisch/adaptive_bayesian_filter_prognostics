@@ -1,0 +1,4 @@
+dataloader_config :
+  path_data : data_NE
+  hi : stiffness_red
+  thresh : 0.15 # 15% stiffness reduction
