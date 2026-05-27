@@ -10,6 +10,14 @@ dependencies = [
     "numpy>=2.4.4",
     "optuna>=4.8.0",
     "pandas>=3.0.2",
+    "plotly>=6.7.0",
     "pre-commit>=4.5.1",
+    "pyaml>=26.2.1",
+    "scikit-learn>=1.8.0",
     "scipy>=1.17.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.14",
 ]
