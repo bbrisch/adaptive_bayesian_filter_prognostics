@@ -2,3 +2,46 @@ dataloader_config :
   path_data : data_NE
   hi : stiffness_red
   thresh : 0.15 # 15% stiffness reduction
+
+particle_filter :
+  n_particles : 1000
+  n_samples_loss : 5
+  sample : 1
+
+  search_space : 
+    w_state : 
+      - 0.000000001 # Lower bound
+      - 0.1 # Upper bound
+      - 0  # Log-space
+      - float # type of param
+
+    w_param : 
+      - 0.000000001 # Lower bound
+      - 0.1 # Upper bound
+      - 0  # Log-space
+      - float # type of param
+    
+    obs_std  :
+      - 0.00001 # Lower bound
+      - 1 # Upper bound
+      - 0  # Log-space
+      - float # type of param
+    
+    resampling_thresh : 
+      - 0 # Lower bound
+      - 0.1 # Upper bound
+      - 0  # Log-space
+      - float # type of param
+
+    smoothing_order : 
+      - 2 # Lower bound
+      - 30 # Upper bound
+      - 0  # Log-space
+      - int # type of param
+      
+  manual_params: 
+    w_state : 0.0001
+    w_param : 0.001
+    obs_std  : 0.01
+    resampling_thresh : 0.4
+    smoothing_order : 15
