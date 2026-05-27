@@ -1,2 +1,3 @@
 from .utils import *
-from .bayesian_opt import *
+from .bayesian_opt import optimize_params, ValidationObj
+from .plotting_fn import *
