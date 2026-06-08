@@ -3,21 +3,32 @@ dataloader_config :
   hi : stiffness_red
   thresh : 0.15 # 15% stiffness reduction
 
+loss : mse
+loss_w : 
+  - 0.5 # Diag
+  - 0.5 # Param
+  - 0 # Prog
+
+name: test_mse_long2
+
+trials : 100
+init_samples : 50
+
 particle_filter :
   n_particles : 1000
-  n_samples_loss : 5
+  n_samples_loss : 2
   sample : 1
 
   search_space : 
     w_state : 
       - 0.000000001 # Lower bound
-      - 0.1 # Upper bound
+      - 0.00001 # Upper bound
       - 0  # Log-space
       - float # type of param
 
     w_param : 
       - 0.000000001 # Lower bound
-      - 0.1 # Upper bound
+      - 0.00001 # Upper bound
       - 0  # Log-space
       - float # type of param
     
@@ -40,8 +51,18 @@ particle_filter :
       - int # type of param
       
   manual_params: 
-    w_state : 0.0001
-    w_param : 0.001
-    obs_std  : 0.01
-    resampling_thresh : 0.4
-    smoothing_order : 15
+    w_state : 0.00001
+    w_param : 0.0001
+    obs_std  : 0.05
+    resampling_thresh : 0.8
+    smoothing_order : 30
+
+
+xgboost :
+  sample : 0
+  manual_params:
+    w_len : 10
+    max_depth: 10
+    learning_rate : 1
+    # subsample : 
+

@@ -31,6 +31,8 @@ class ResultsBuffer:
 
     def get_prognostic(self):
         return np.array(self.prognostic_buffer)
+    
+    
 
     def __getitem__(self, key):
         return (

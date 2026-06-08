@@ -13,11 +13,14 @@ from optuna.visualization.matplotlib import plot_param_importances
 with open(os.path.join("src", "sweep_config.yml"), "rb") as f:
     config = yaml.safe_load(f)
 
-# src.train_test_split(config['dataloader_config']['path_data'])
+# src.train_test_split(config['dataloader_config']['path_data'], 1)
+src.train_special_split(config['dataloader_config']['path_data'])
+os.makedirs('results', exist_ok=True)
+
 
 
 study = src.optimize_params(config)
 best_params = study.best_params
 
-with open("study2.pkl", "wb") as f:
-    pkl.dump(study, f)
+with open(os.path.join('results', config['name']+'.pkl'), "wb") as f:
+    pkl.dump((config,study), f)

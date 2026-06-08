@@ -112,7 +112,7 @@ class SIR_PF:
         self.y_buffer = []
 
     def update_y_buffer(self, y):
-        if len(self.y_buffer) < self.smoothing_order:
+        if len(self.y_buffer) <= self.smoothing_order:
             self.y_buffer.append(y)
         else:
             self.y_buffer = self.y_buffer[1:] + [y]
@@ -128,74 +128,74 @@ class SIR_PF:
         # y_pred = self.obs_fn(x_next)
 
         # 2. Compute the new wheights (assuming p(x_t|x_1:t-1) = q(x_t|x_1:t-1)) and chi2 smooting
-        if self.smoothing_order // 2 < len(self.y_buffer):
-            # Step 2.1: compute chi2
-            chi2 = 0
-            l = len(self.y_buffer)
-            for i, y_ in enumerate(self.y_buffer):
+        # if self.smoothing_order < len(self.y_buffer):
+        # Step 2.1: compute chi2
+        chi2 = 0
+        l = len(self.y_buffer)
+        for i, y_ in enumerate(self.y_buffer):
 
-                chi2 += (
-                    y_ - self.obs_fn(self.backprop_eq(x_next, param_next, l - i))
-                ) ** 2 / (self.sigma_measurements**2)
-                # print(y_, self.obs_fn(self.backprop_eq(x_next, param_next,l-i)), l-i, len(self.y_buffer))
+            chi2 += (
+                y_ - self.obs_fn(self.backprop_eq(x_next, param_next, l - i))
+            ) ** 2 / (self.sigma_measurements**2)
+            # print(y_, self.obs_fn(self.backprop_eq(x_next, param_next,l-i)), l-i, len(self.y_buffer))
 
-            # Step 2.2: compute the new wheights
-            # w_new = (chi2**(M/2-1)*np.exp(-chi2/2))/(2**(M/2)*gamma(M/2))
-            log_w_new = (
-                np.log(chi2) * (self.smoothing_order / 2 - 1)
-                - chi2 / 2
-                - np.log(
-                    (2 ** (self.smoothing_order / 2) * gamma(self.smoothing_order / 2))
-                )
+        # Step 2.2: compute the new wheights
+        # w_new = (chi2**(M/2-1)*np.exp(-chi2/2))/(2**(M/2)*gamma(M/2))
+        log_w_new = (
+            np.log(chi2) * (self.smoothing_order / 2 - 1)
+            - chi2 / 2
+            - np.log(
+                (2 ** (self.smoothing_order / 2) * gamma(self.smoothing_order / 2))
             )
-            w_next2 = np.exp(log_w_new - log_w_new.max())
-            w_next = w_next2 / w_next2.sum()
+        )
+        w_next2 = np.exp(log_w_new - log_w_new.max())
+        w_next = w_next2 / w_next2.sum()
 
-            # 3. Resampling to avoid degenerancy
-            N_eff = 1 / ((w_next**2).sum())
-            N_eff = N_eff / self.N_particles
+        # 3. Resampling to avoid degenerancy
+        N_eff = 1 / ((w_next**2).sum())
+        N_eff = N_eff / self.N_particles
 
-            if np.isnan(N_eff):
+        if np.isnan(N_eff):
 
-                #     print(chi2)
-                #     print(np.log(chi2))
-                #     print(log_w_new)
-                #     print(w_next2)
-                #     print(w_next)
+            #     print(chi2)
+            #     print(np.log(chi2))
+            #     print(log_w_new)
+            #     print(w_next2)
+            #     print(w_next)
 
-                assert False, "N eff is nan"
+            assert False, "N eff is nan"
 
-            # print(N_eff,self.resampling_threshold )
+        # print(N_eff,self.resampling_threshold )
 
-            if N_eff < self.resampling_threshold:
-                # print('Resampling',N_eff,self.resampling_threshold, '\n')
+        if N_eff < self.resampling_threshold:
+            # print('Resampling',N_eff,self.resampling_threshold, '\n')
 
-                # _ = input()
-                ind_choice = np.random.choice(
-                    np.arange(self.N_particles),
-                    self.N_particles,
-                    replace=True,
-                    p=w_next,
-                )
+            # _ = input()
+            ind_choice = np.random.choice(
+                np.arange(self.N_particles),
+                self.N_particles,
+                replace=True,
+                p=w_next,
+            )
 
-                x_next = x_next[ind_choice]
-                param_next = param_next[ind_choice]
+            x_next = x_next[ind_choice]
+            param_next = param_next[ind_choice]
 
-                # if np.isnan(w_next.ravel()).sum():
-                #     assert False, 'W eff is nan'
+            # if np.isnan(w_next.ravel()).sum():
+            #     assert False, 'W eff is nan'
 
-                # # print(np.isinf(x_next.ravel()).sum(), np.isnan(x_next.ravel()).sum())
-                # # print(np.isinf(param_next.ravel()).sum(), np.isnan(param_next.ravel()).sum())
-                # # print(np.isinf(w_next.ravel()).sum(), np.isnan(w_next.ravel()).sum(), '\n')
+            # # print(np.isinf(x_next.ravel()).sum(), np.isnan(x_next.ravel()).sum())
+            # # print(np.isinf(param_next.ravel()).sum(), np.isnan(param_next.ravel()).sum())
+            # # print(np.isinf(w_next.ravel()).sum(), np.isnan(w_next.ravel()).sum(), '\n')
 
-                # x_next = np.clip(gaussian_kde(x_next, weights=w_next.ravel()).resample(self.N_particles).ravel(), 0,1)
-                # param_next = np.clip(gaussian_kde(param_next, weights=w_next.ravel()).resample(self.N_particles).ravel(),1e-4, np.inf)
+            # x_next = np.clip(gaussian_kde(x_next, weights=w_next.ravel()).resample(self.N_particles).ravel(), 0,1)
+            # param_next = np.clip(gaussian_kde(param_next, weights=w_next.ravel()).resample(self.N_particles).ravel(),1e-4, np.inf)
 
-                w_next = np.ones_like(w_next) / self.N_particles
+            w_next = np.ones_like(w_next) / self.N_particles
 
-            # assert False
-        else:
-            w_next = self.w
+        #     # assert False
+        # else:
+        #     w_next = self.w
 
         # 4. Asign the new state
         self.x = x_next

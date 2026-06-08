@@ -48,7 +48,7 @@ def crps_loss_single(y_series:np.array, x_series:np.array, w_series:np.array):
 
 
 
-def mse_loss_full(x_gt_series:list,param_gt_series:list, rul_gt_series: list, results_list:list):
+def mse_loss_full(x_gt_series:list,param_gt_series:list, rul_gt_series: list, results_list:list, scale):
     
     # compute MSE for the diognostic
     mse_diagnostic_list = []
@@ -57,19 +57,19 @@ def mse_loss_full(x_gt_series:list,param_gt_series:list, rul_gt_series: list, re
     
     for x, param, rul, results in zip(x_gt_series,param_gt_series,rul_gt_series, results_list):
         mse_diagnostic = mse_loss_single(
-                                        x,
-                                        results.get_x(),
+                                        (x-scale['hi_bias'])/scale['hi_factor'],
+                                        (results.get_x()-scale['hi_bias'])/scale['hi_factor'],
                                         results.get_w()                             
                                         )
         mse_param = mse_loss_single(
-                                        np.ones_like(x)*param,
-                                        results.get_p(),
+                                        (np.ones_like(x)*param-scale['p_bias'])/scale['p_factor'],
+                                        (results.get_p()-scale['p_bias'])/scale['p_factor'],
                                         results.get_w()                             
                                         )
         
         mse_prognostic = mse_loss_single(
-                                        rul/max(rul),
-                                        results.get_prognostic()/max(rul),
+                                        (rul-scale['rul_bias'])/scale['rul_factor'],
+                                        (results.get_prognostic()-scale['rul_bias'])/scale['rul_factor'],
                                         results.get_w()                             
                                         )
         
@@ -85,7 +85,7 @@ def mse_loss_full(x_gt_series:list,param_gt_series:list, rul_gt_series: list, re
         
     return np.mean(mse_diagnostic_list), np.mean(mse_param_list),np.mean(mse_prognostic_list)
 
-def crps_loss_full(x_gt_series:list,param_gt_series:list, rul_gt_series: list, results_list:list):
+def crps_loss_full(x_gt_series:list,param_gt_series:list, rul_gt_series: list, results_list:list, scale):
     
     # compute MSE for the diognostic
     crps_diagnostic_list = []
@@ -94,18 +94,18 @@ def crps_loss_full(x_gt_series:list,param_gt_series:list, rul_gt_series: list, r
     
     for x, param, rul, results in zip(x_gt_series,param_gt_series,rul_gt_series, results_list):
         crps_diagnostic= crps_loss_single(
-                                        x,
-                                        results.get_x(),
+                                        (x-scale['hi_bias'])/scale['hi_factor'],
+                                        (results.get_x()-scale['hi_bias'])/scale['hi_factor'],
                                         results.get_w()                             
                                         )
         crps_param = crps_loss_single(
-                                        np.ones_like(x)*param,
-                                        results.get_p(),
+                                        (np.ones_like(x)*param-scale['p_bias'])/scale['p_factor'],
+                                        (results.get_p()-scale['p_bias'])/scale['p_factor'],
                                         results.get_w()                             
                                         )
         crps_prognostic = crps_loss_single(
-                                        rul/max(rul),
-                                        results.get_prognostic()/max(rul),
+                                        (rul-scale['rul_bias'])/scale['rul_factor'],
+                                        (results.get_prognostic()-scale['rul_bias'])/scale['rul_factor'],
                                         results.get_w()                             
                                         )
         
